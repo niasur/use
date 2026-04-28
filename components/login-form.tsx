@@ -17,70 +17,71 @@ export default function LoginForm() {
 
   const router = useRouter();
 
-  const handleLogin = async () => {
-    if (mode === "mahasiswa") {
-      if (!nama || !npm) {
-        alert("Isi nama & NPM dulu!");
-        return;
-      }
-
-      const { data: existingMahasiswa } = await supabase
-        .from("mahasiswa")
-        .select("*")
-        .eq("npm", npm)
-        .maybeSingle();
-
-      let mahasiswa;
-
-      if (existingMahasiswa) {
-        mahasiswa = existingMahasiswa;
-      } else {
-        const { data, error } = await supabase
-          .from("mahasiswa")
-          .insert([{ nama, npm }])
-          .select()
-          .single();
-
-        if (error) {
-          alert("Gagal menyimpan data");
-          return;
-        }
-
-        mahasiswa = data;
-      }
-
-      const { data: sudahIsi } = await supabase
-        .from("evaluations")
-        .select("id")
-        .eq("student_id", npm)
-        .maybeSingle();
-
-      if (sudahIsi) {
-        alert("Anda sudah mengisi kuesioner");
-        return;
-      }
-
-      localStorage.setItem("mahasiswa_id", mahasiswa.id);
-      localStorage.setItem("nama", mahasiswa.nama);
-      localStorage.setItem("npm", mahasiswa.npm);
-
-      router.push("/kuesioner");
+const handleLogin = async () => {
+  if (mode === "mahasiswa") {
+    if (!nama || !npm) {
+      alert("Isi nama & NPM dulu!");
+      return;
     }
 
-const { data, error } = await supabase
-  .from("admin")
-  .select("*")
-  .eq("username", username)
-  .eq("password", password)
-  .single();
+    const { data: existingMahasiswa } = await supabase
+      .from("mahasiswa")
+      .select("*")
+      .eq("npm", npm)
+      .maybeSingle();
 
-if (error || !data) {
-  alert("Username / Password salah");
-} else {
-  localStorage.setItem("admin_username", data.username);
-  router.push("/admin");
-}
-  };
+    let mahasiswa;
+
+    if (existingMahasiswa) {
+      mahasiswa = existingMahasiswa;
+    } else {
+      const { data, error } = await supabase
+        .from("mahasiswa")
+        .insert([{ nama, npm }])
+        .select()
+        .single();
+
+      if (error) {
+        alert("Gagal menyimpan data");
+        return;
+      }
+
+      mahasiswa = data;
+    }
+
+    const { data: sudahIsi } = await supabase
+      .from("evaluations")
+      .select("id")
+      .eq("student_id", npm)
+      .maybeSingle();
+
+    if (sudahIsi) {
+      alert("Anda sudah mengisi kuesioner");
+      return;
+    }
+
+    localStorage.setItem("mahasiswa_id", mahasiswa.id);
+    localStorage.setItem("nama", mahasiswa.nama);
+    localStorage.setItem("npm", mahasiswa.npm);
+
+    router.push("/kuesioner");
+  } else {
+    // 🔒 ADMIN (tidak diubah)
+    const { data, error } = await supabase
+      .from("admin")
+      .select("*")
+      .eq("username", username)
+      .eq("password", password)
+      .single();
+
+    if (error || !data) {
+      alert("Username / Password salah");
+    } else {
+      localStorage.setItem("admin_username", data.username);
+      router.push("/admin");
+    }
+  }
+};
 
   return (
     <div className="max-w-md mx-auto p-6">
