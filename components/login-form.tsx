@@ -67,14 +67,19 @@ export default function LoginForm() {
       router.push("/kuesioner");
     }
 
-    if (mode === "admin") {
-      if (username === "admin" && password === "admin123") {
-        localStorage.setItem("admin_username", username);
-        router.push("/admin");
-      } else {
-        alert("Username / Password salah");
-      }
-    }
+const { data, error } = await supabase
+  .from("admin")
+  .select("*")
+  .eq("username", username)
+  .eq("password", password)
+  .single();
+
+if (error || !data) {
+  alert("Username / Password salah");
+} else {
+  localStorage.setItem("admin_username", data.username);
+  router.push("/admin");
+}
   };
 
   return (

@@ -28,13 +28,14 @@ export default function KuesionerPage() {
     fetchQuestions();
   }, []);
 
-  const fetchQuestions = async () => {
-    const { data } = await supabase
-      .from("pertanyaan")
-      .select("*");
+const fetchQuestions = async () => {
+  const { data } = await supabase
+    .from("pertanyaan")
+    .select("*")
+    .neq("kategori", "Saran");
 
-    setQuestions(data || []);
-  };
+  setQuestions(data || []);
+};
 
   const handleChange = (qid: string, value: number) => {
     setAnswers((prev) => ({
@@ -43,47 +44,57 @@ export default function KuesionerPage() {
     }));
   };
 
-  // ======================
-  // SUBMIT
-  // ======================
-  const handleSubmit = async () => {
-    if (!mahasiswa_id || !nama || !npm) {
-      alert("Session tidak ditemukan");
-      return;
-    }
+const handleSubmit = async () => {
+  if (!mahasiswa_id || !nama || !npm) {
+    alert("Session tidak ditemukan");
+    return;
+  }
 
-    const totalQuestions = questions.length;
+  const totalQuestions = questions.filter((q) =>
+    ["Usefulness", "Ease of Use", "Ease of Learning", "Satisfaction"]
+      .includes(q.kategori)
+  ).length;
 
-    // 🔥 exclude saran dari validasi
-    const answeredCount = Object.keys(answers).filter(
-      (k) => k !== "saran"
-    ).length;
+  const answeredCount = questions.filter(
+    (q) => q.tipe === "likert" && answers[q.id] !== undefined
+  ).length;
 
-    if (answeredCount !== totalQuestions) {
-      alert("Semua pertanyaan harus diisi!");
-      return;
-    }
+  if (answeredCount !== totalQuestions) {
+    alert("Semua pertanyaan harus diisi!");
+    return;
+  }
 
-    // ======================
-    // SIMPAN JAWABAN
-    // ======================
-    const jawabanData = Object.entries(answers)
-      .filter(([k]) => k !== "saran")
-      .map(([pertanyaan_id, nilai]) => ({
+  try {
+    // simpan semua jawaban (likert + text)
+    const jawabanData = questions.map((q) => {
+      const value = answers[q.id];
+
+      if (q.tipe === "text") {
+        return {
+          mahasiswa_id,
+          pertanyaan_id: q.id,
+          jawaban_text: value || null,
+        };
+      }
+
+      return {
         mahasiswa_id,
-        pertanyaan_id,
-        nilai
-      }));
+        pertanyaan_id: q.id,
+        nilai: value || null,
+      };
+    });
 
-    const { error: jawabanError } = await supabase
+    const { error } = await supabase
       .from("jawaban")
       .insert(jawabanData);
 
-    if (jawabanError) {
-      alert("Gagal simpan jawaban");
-      return;
-    }
+    if (error) throw error;
 
+    alert("Berhasil submit!");
+  } catch (err: any) {
+    alert(err.message || "Gagal submit");
+  }
+  
     // ======================
     // HITUNG NILAI
     // ======================
@@ -160,7 +171,7 @@ export default function KuesionerPage() {
   </p>
 
   {/* SKALA */}
-  <div className="flex gap-2 flex-wrap">
+  <div className="flex flex-col gap-2">
     {[
       "Sangat Tidak Setuju",
       "Tidak Setuju",

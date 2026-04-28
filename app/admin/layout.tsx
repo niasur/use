@@ -2,6 +2,7 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { LogOut } from "lucide-react";
 
 export default function AdminLayout({
   children,
@@ -12,7 +13,7 @@ export default function AdminLayout({
   const pathname = usePathname();
 
   const [username, setUsername] = useState("");
-  const [open, setOpen] = useState(false); // 🔥 sidebar toggle
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const user = localStorage.getItem("admin_username");
@@ -25,13 +26,14 @@ export default function AdminLayout({
   };
 
   return (
-    <div className="flex min-h-screen">
+    <div className="flex">
 
       {/* ================= SIDEBAR ================= */}
       <div
         className={`
-          fixed md:static top-0 left-0 h-full z-50
-          w-64 bg-blue-600 text-white p-5 flex flex-col
+          fixed top-0 left-0 z-50 h-screen w-64
+          bg-blue-600 text-white p-5 flex flex-col
+          overflow-y-auto
           transform transition-transform duration-300
           ${open ? "translate-x-0" : "-translate-x-full"}
           md:translate-x-0
@@ -88,14 +90,15 @@ export default function AdminLayout({
 
           <button
             onClick={handleLogout}
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/10"
+            className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/10 transition"
           >
-            ↩ Keluar
+            <LogOut size={18} />
+            Keluar
           </button>
         </div>
       </div>
 
-      {/* ================= OVERLAY (mobile) ================= */}
+      {/* ================= OVERLAY ================= */}
       {open && (
         <div
           onClick={() => setOpen(false)}
@@ -104,13 +107,14 @@ export default function AdminLayout({
       )}
 
       {/* ================= CONTENT ================= */}
-      <div className="flex-1 bg-gray-50 min-h-screen">
+      <div className="flex-1 md:ml-64 bg-gray-50 min-h-screen">
 
-        {/* TOPBAR (mobile) */}
+        {/* TOPBAR MOBILE */}
         <div className="md:hidden flex items-center justify-between p-4 bg-white shadow">
           <button onClick={() => setOpen(true)}>
             ☰
           </button>
+          <span className="font-semibold">Admin</span>
         </div>
 
         <div className="p-6">

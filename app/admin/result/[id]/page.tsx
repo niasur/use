@@ -9,7 +9,8 @@ export default function ResultDetailPage() {
 
   const [evaluation, setEvaluation] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
-  const [answers, setAnswers] = useState<Record<string, number>>({});
+  const [answers, setAnswers] = useState<Record<string, any>>({});
+  const [saran, setSaran] = useState("");
 
   useEffect(() => {
     if (id) fetchDetail();
@@ -26,10 +27,26 @@ export default function ResultDetailPage() {
     if (!evalData) return;
     setEvaluation(evalData);
 
-    // 2️⃣ Ambil semua pertanyaan
+let saranText = "";
+
+try {
+  const parsed =
+    typeof evalData.answers === "string"
+      ? JSON.parse(evalData.answers)
+      : evalData.answers;
+
+  saranText = parsed?.saran || "";
+} catch (err) {
+  console.error(err);
+}
+
+setSaran(saranText);
+
+    // 2️⃣ Ambil pertanyaan (SUDAH ADA TIPE)
     const { data: qData } = await supabase
       .from("pertanyaan")
-      .select("*");
+      .select("*")
+      .order("urutan", { ascending: true })
 
     setQuestions(qData || []);
 
@@ -42,15 +59,17 @@ export default function ResultDetailPage() {
 
     if (!mahasiswa) return;
 
-    // 4️⃣ Ambil jawaban
+    // 4️⃣ Ambil semua jawaban (LIKERT + TEXT)
     const { data: jawabanData } = await supabase
       .from("jawaban")
       .select("*")
       .eq("mahasiswa_id", mahasiswa.id);
 
-    const map: Record<string, number> = {};
+    const map: Record<string, any> = {};
+
     jawabanData?.forEach((j: any) => {
-      map[j.pertanyaan_id] = j.nilai;
+      map[j.pertanyaan_id] =
+        j.jawaban_text ?? j.nilai ?? null;
     });
 
     setAnswers(map);
@@ -69,7 +88,6 @@ export default function ResultDetailPage() {
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-
       <h1 className="text-xl font-bold mb-4">
         Detail Hasil Kuesioner
       </h1>
@@ -85,42 +103,45 @@ export default function ResultDetailPage() {
       {/* ======================
           LOOP PER KATEGORI
       ====================== */}
-      {Object.keys(groupedQuestions).map((kategori) => (
-        <div key={kategori} className="mb-6">
+{Object.keys(groupedQuestions).map((kategori) => (
+  <div key={kategori} className="mb-6">
 
-          {/* TITLE */}
-          <h2 className="font-semibold text-blue-600 mb-3">
-            {kategori}
-          </h2>
+    <h2 className="font-semibold text-blue-600 mb-3">
+      {kategori}
+    </h2>
 
-          {/* LIST PERTANYAAN */}
-          {groupedQuestions[kategori].map((q: any, i: number) => (
-            <div
-              key={q.id}
-              className="mb-4 border p-3 rounded-xl"
-            >
-              <p className="mb-2">
-                {i + 1}. {q.isi_pertanyaan}
-              </p>
+    {groupedQuestions[kategori].map((q: any, i: number) => (
+      <div
+        key={q.id}
+        className="mb-4 border p-3 rounded-xl"
+      >
+        <p className="mb-2">
+          {i + 1}. {q.isi_pertanyaan}
+        </p>
 
-              <div className="flex gap-4">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <label key={n} className="flex items-center gap-1">
-                    <input
-                      type="radio"
-                      checked={answers[q.id] === n}
-                      readOnly
-                    />
-                    {n}
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
+        {/* RENDER SESUAI TIPE */}
+{q.tipe === "likert" ? (
+  <div className="flex gap-4">
+    {[1, 2, 3, 4, 5].map((n) => (
+      <label key={n} className="flex items-center gap-1">
+        <input
+          type="radio"
+          checked={answers[q.id] === n}
+          readOnly
+        />
+        {n}
+      </label>
+    ))}
+  </div>
+) : (
+  <div className="border-l-4 border-green-500 p-3 rounded bg-green-50 whitespace-pre-line">
+    {answers[q.id] || (q.tipe === "text" ? saran : "Tidak ada jawaban")}
+  </div>
+)}
+      </div>
+    ))}
 
-        </div>
-      ))}
-
-    </div>
-  );
-}
+  </div>
+))}
+</div>
+  )}

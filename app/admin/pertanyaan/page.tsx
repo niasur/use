@@ -26,7 +26,7 @@ export default function PertanyaanPage() {
     const { data } = await supabase
       .from("pertanyaan")
       .select("*")
-      .order("kategori");
+      .order("urutan", { ascending: true });
 
     setData(data || []);
   };
@@ -39,10 +39,14 @@ export default function PertanyaanPage() {
   const tambah = async () => {
     if (!isi.trim()) return alert("Isi dulu!");
 
+    // 🔥 AUTO TIPE
+    const tipe = kategori === "Saran" ? "text" : "likert";
+
     const { error } = await supabase.from("pertanyaan").insert([
       {
         isi_pertanyaan: isi,
-        kategori
+        kategori,
+        tipe // ✅ FIX UTAMA
       }
     ]);
 
@@ -69,9 +73,16 @@ export default function PertanyaanPage() {
   const simpanEdit = async () => {
     if (!editText.trim()) return;
 
+    const item = data.find((d) => d.id === editId);
+
+    const tipe = item?.kategori === "Saran" ? "text" : "likert";
+
     await supabase
       .from("pertanyaan")
-      .update({ isi_pertanyaan: editText })
+      .update({
+        isi_pertanyaan: editText,
+        tipe // ✅ FIX JUGA DI EDIT
+      })
       .eq("id", editId);
 
     setEditId(null);
