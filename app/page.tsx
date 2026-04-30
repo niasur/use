@@ -51,7 +51,7 @@ export default function HomePage() {
 
             <p className="mt-6 text-blue-100 max-w-lg">
               Sistem evaluasi usability berbasis USE Questionnaire untuk mengukur aspek pengalaman pengguna
-              terhadap fitur Kartu Rencana Studi pada Sistem Infromasi Akademik.
+              terhadap fitur Kartu Rencana Studi pada SIAKAD UNIPEM.
             </p>
           </div>
 
