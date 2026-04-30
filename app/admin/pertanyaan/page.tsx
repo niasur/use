@@ -39,14 +39,14 @@ export default function PertanyaanPage() {
   const tambah = async () => {
     if (!isi.trim()) return alert("Isi dulu!");
 
-    // 🔥 AUTO TIPE
+    // AUTO TIPE
     const tipe = kategori === "Saran" ? "text" : "likert";
 
     const { error } = await supabase.from("pertanyaan").insert([
       {
         isi_pertanyaan: isi,
         kategori,
-        tipe // ✅ FIX UTAMA
+        tipe //
       }
     ]);
 
@@ -91,11 +91,7 @@ export default function PertanyaanPage() {
   };
 
   return (
-    <div className="p-4 md:p-6 max-w-4xl mx-auto">
-      <h1 className="font-bold text-xl mb-4">
-        Kelola Pertanyaan
-      </h1>
-
+    <div className="min-h-screen bg-gray-50 p-4 md:p-6 w-full max-w-6xl">
       {/* ================= FORM ================= */}
       <div className="mb-6 flex flex-col md:flex-row gap-3">
         <input

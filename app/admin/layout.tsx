@@ -25,6 +25,18 @@ export default function AdminLayout({
     router.push("/");
   };
 
+  const toggleSidebar = () => {
+    setOpen(!open);
+  };
+
+  // ================= TITLE DINAMIS =================
+  const titles: Record<string, string> = {
+    "/admin": "Dashboard Admin",
+    "/admin/pertanyaan": "Kelola Pertanyaan",
+  };
+
+  const title = titles[pathname] || "Admin";
+
   return (
     <div className="flex">
 
@@ -39,7 +51,6 @@ export default function AdminLayout({
           md:translate-x-0
         `}
       >
-        {/* TITLE */}
         <h1 className="text-xl font-bold mb-8">
           Evaluasi KRS
         </h1>
@@ -109,14 +120,23 @@ export default function AdminLayout({
       {/* ================= CONTENT ================= */}
       <div className="flex-1 md:ml-64 bg-gray-50 min-h-screen">
 
-        {/* TOPBAR MOBILE */}
-        <div className="md:hidden flex items-center justify-between p-4 bg-white shadow">
-          <button onClick={() => setOpen(true)}>
+        {/* ================= TOPBAR ================= */}
+        <div className="flex items-center gap-3 px-4 py-3 border-b bg-white">
+
+          <button
+            onClick={toggleSidebar}
+            className="text-xl p-2 rounded hover:bg-gray-100"
+          >
             ☰
           </button>
-          <span className="font-semibold">Admin</span>
+
+          <span className="font-semibold text-lg">
+            {title}
+          </span>
+
         </div>
 
+        {/* ================= PAGE CONTENT ================= */}
         <div className="p-6">
           {children}
         </div>

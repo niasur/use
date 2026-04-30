@@ -17,7 +17,7 @@ export default function ResultDetailPage() {
   }, [id]);
 
   const fetchDetail = async () => {
-    // 1️⃣ Ambil evaluation
+    // Ambil evaluation
     const { data: evalData } = await supabase
       .from("evaluations")
       .select("*")
@@ -42,7 +42,7 @@ try {
 
 setSaran(saranText);
 
-    // 2️⃣ Ambil pertanyaan (SUDAH ADA TIPE)
+    // Ambil pertanyaan (SUDAH ADA TIPE)
     const { data: qData } = await supabase
       .from("pertanyaan")
       .select("*")
@@ -50,7 +50,7 @@ setSaran(saranText);
 
     setQuestions(qData || []);
 
-    // 3️⃣ Ambil mahasiswa
+    // Ambil mahasiswa
     const { data: mahasiswa } = await supabase
       .from("mahasiswa")
       .select("id")
@@ -59,7 +59,7 @@ setSaran(saranText);
 
     if (!mahasiswa) return;
 
-    // 4️⃣ Ambil semua jawaban (LIKERT + TEXT)
+    // Ambil semua jawaban (LIKERT + TEXT)
     const { data: jawabanData } = await supabase
       .from("jawaban")
       .select("*")

@@ -90,7 +90,6 @@ const handleSubmit = async () => {
 
     if (error) throw error;
 
-    alert("Berhasil submit!");
   } catch (err: any) {
     alert(err.message || "Gagal submit");
   }
