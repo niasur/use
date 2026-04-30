@@ -81,7 +81,7 @@ export default function PertanyaanPage() {
       .from("pertanyaan")
       .update({
         isi_pertanyaan: editText,
-        tipe // ✅ FIX JUGA DI EDIT
+        tipe
       })
       .eq("id", editId);
 

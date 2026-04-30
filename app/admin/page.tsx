@@ -7,12 +7,17 @@ import { useRouter } from "next/navigation";
 export default function AdminPage() {
   const [data, setData] = useState<any[]>([]);
   const [kategoriStats, setKategoriStats] = useState<any[]>([]);
+  const [globalStats, setGlobalStats] = useState({
+    mean: 0,
+    percent: 0,
+  });
 
   const router = useRouter();
 
   useEffect(() => {
     fetchData();
     fetchKategoriStats();
+    fetchGlobalStats(); // 🔥 FIX UTAMA
   }, []);
 
   // ================= FETCH DATA =================
@@ -25,7 +30,29 @@ export default function AdminPage() {
     setData(data || []);
   };
 
-  // ================= FETCH KATEGORI =================
+  // ================= GLOBAL (AKURAT) =================
+  const fetchGlobalStats = async () => {
+    const { data } = await supabase
+      .from("jawaban")
+      .select("nilai");
+
+    const values = (data || [])
+      .filter(d => d.nilai !== null && d.nilai !== undefined)
+      .map(d => Number(d.nilai));
+
+    const total = values.reduce((a, b) => a + b, 0);
+    const jumlah = values.length;
+
+    const mean = total / (jumlah || 1);
+    const percent = (mean / 5) * 100;
+
+    setGlobalStats({
+      mean,
+      percent,
+    });
+  };
+
+  // ================= PER KATEGORI =================
   const fetchKategoriStats = async () => {
     const { data } = await supabase
       .from("jawaban")
@@ -37,16 +64,17 @@ export default function AdminPage() {
     const map: any = {};
 
     data?.forEach((j: any) => {
-      if (!j.nilai) return;
+      if (j.nilai === null || j.nilai === undefined) return;
 
       const k = j.pertanyaan.kategori;
 
       if (!map[k]) map[k] = [];
-      map[k].push(j.nilai);
+      map[k].push(Number(j.nilai)); // 🔥 FIX
     });
 
     const result = Object.keys(map).map((k) => {
       const values = map[k];
+
       const mean =
         values.reduce((a: number, b: number) => a + b, 0) /
         values.length;
@@ -85,14 +113,6 @@ export default function AdminPage() {
   // ================= SUMMARY =================
   const total = data.length;
 
-  const avg =
-    data.reduce((a, b) => a + b.mean_score, 0) /
-    (data.length || 1);
-
-  const percent =
-    data.reduce((a, b) => a + b.percentage, 0) /
-    (data.length || 1);
-
   // ================= ANALISIS =================
   const sorted = [...kategoriStats].sort(
     (a, b) => b.mean - a.mean
@@ -113,13 +133,13 @@ export default function AdminPage() {
 
         <div className="bg-white p-4 rounded-xl shadow">
           <p>Rata-rata Keseluruhan</p>
-          <h2>{avg.toFixed(2)}</h2>
+          <h2>{globalStats.mean.toFixed(2)}</h2>
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow">
           <p>Kategori</p>
-          <span className={`px-3 py-1 rounded-full text-sm ${kategoriColor(percent)}`}>
-            {kategoriLabel(percent)}
+          <span className={`px-3 py-1 rounded-full text-sm ${kategoriColor(globalStats.percent)}`}>
+            {kategoriLabel(globalStats.percent)}
           </span>
         </div>
       </div>

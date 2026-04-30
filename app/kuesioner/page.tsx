@@ -102,7 +102,7 @@ const handleSubmit = async () => {
       .map(([_, v]) => Number(v));
 
     const mean =
-      values.reduce((a, b) => a + b, 0) / values.length;
+      values.reduce((a, b) => a + Number(b), 0) / values.length;
 
     const percentage = (mean / 5) * 100;
 
@@ -113,6 +113,7 @@ const handleSubmit = async () => {
       .from("evaluations")
       .insert([
         {
+          mahasiswa_id: mahasiswa_id,
           student_name: nama,
           student_id: npm,
           answers,

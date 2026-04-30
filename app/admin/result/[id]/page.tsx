@@ -96,8 +96,6 @@ setSaran(saranText);
       <div className="mb-6 border p-4 rounded-xl bg-gray-50">
         <p><b>Nama:</b> {evaluation.student_name}</p>
         <p><b>NPM:</b> {evaluation.student_id}</p>
-        <p><b>Mean:</b> {evaluation.mean_score.toFixed(2)}</p>
-        <p><b>Persentase:</b> {evaluation.percentage.toFixed(1)}%</p>
       </div>
 
       {/* ======================
