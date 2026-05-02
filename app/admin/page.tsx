@@ -133,7 +133,7 @@ export default function AdminPage() {
 
         <div className="bg-white p-4 rounded-xl shadow">
           <p>Rata-rata Keseluruhan</p>
-          <h2>{globalStats.mean.toFixed(2)}</h2>
+          <h2>{globalStats.mean.toFixed(2)} / {globalStats.percent.toFixed(1)}%</h2>
         </div>
 
         <div className="bg-white p-4 rounded-xl shadow">
