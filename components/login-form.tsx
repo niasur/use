@@ -170,7 +170,7 @@ const handleLogin = async () => {
         onClick={handleLogin}
         className="w-full bg-blue-600 text-white p-3 rounded-lg hover:bg-blue-700 mt-3"
       >
-        Masuk
+        Login
       </button>
 
       {/* LUPA PASSWORD - PINDAH KE BAWAH */}

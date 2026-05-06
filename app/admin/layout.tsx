@@ -104,7 +104,7 @@ export default function AdminLayout({
             className="flex items-center gap-3 w-full px-3 py-2 rounded-xl hover:bg-white/10 transition"
           >
             <LogOut size={18} />
-            Keluar
+            Logout
           </button>
         </div>
       </div>
