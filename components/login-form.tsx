@@ -10,6 +10,7 @@ export default function LoginForm() {
 
   const [nama, setNama] = useState("");
   const [npm, setNpm] = useState("");
+  const [npmError, setNpmError] = useState("");
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -17,71 +18,88 @@ export default function LoginForm() {
 
   const router = useRouter();
 
-const handleLogin = async () => {
-  if (mode === "mahasiswa") {
-    if (!nama || !npm) {
-      alert("Isi nama & NPM dulu!");
-      return;
-    }
-
-    const { data: existingMahasiswa } = await supabase
-      .from("mahasiswa")
-      .select("*")
-      .eq("npm", npm)
-      .maybeSingle();
-
-    let mahasiswa;
-
-    if (existingMahasiswa) {
-      mahasiswa = existingMahasiswa;
-    } else {
-      const { data, error } = await supabase
-        .from("mahasiswa")
-        .insert([{ nama, npm }])
-        .select()
-        .single();
-
-      if (error) {
-        alert("Gagal menyimpan data");
+  const handleLogin = async () => {
+    if (mode === "mahasiswa") {
+      if (!nama || !npm) {
+        alert("Isi nama & NPM dulu!");
         return;
       }
 
-      mahasiswa = data;
-    }
+      // VALIDASI NPM
+      if (!/^\d+$/.test(npm)) {
+        alert("NPM hanya boleh angka");
+        return;
+      }
 
-    const { data: sudahIsi } = await supabase
-      .from("evaluations")
-      .select("id")
-      .eq("student_id", npm)
-      .maybeSingle();
+      const npmNumber = Number(npm);
 
-    if (sudahIsi) {
-      alert("Anda sudah mengisi kuesioner");
-      return;
-    }
+      // CEK MAHASISWA
+      const { data: existingMahasiswa } = await supabase
+        .from("mahasiswa")
+        .select("*")
+        .eq("npm", npmNumber)
+        .maybeSingle();
 
-    localStorage.setItem("mahasiswa_id", mahasiswa.id);
-    localStorage.setItem("nama", mahasiswa.nama);
-    localStorage.setItem("npm", mahasiswa.npm);
+      let mahasiswa;
 
-    router.push("/kuesioner");
-  } else {
-    // 🔒 ADMIN (tidak diubah)
-    const { data, error } = await supabase
-      .from("admin")
-      .select("*")
-      .eq("username", username)
-      .eq("password", password)
-      .single();
+      if (existingMahasiswa) {
+        mahasiswa = existingMahasiswa;
+      } else {
+        // INSERT MAHASISWA BARU
+        const { data, error } = await supabase
+          .from("mahasiswa")
+          .insert([
+            {
+              nama,
+              npm: npmNumber,
+            },
+          ])
+          .select()
+          .single();
 
-    if (error || !data) {
-      alert("Username / Password salah");
+        if (error) {
+          alert("Gagal menyimpan data");
+          return;
+        }
+
+        mahasiswa = data;
+      }
+
+      // CEK SUDAH ISI KUESIONER
+      const { data: sudahIsi } = await supabase
+        .from("evaluations")
+        .select("id")
+        .eq("student_id", npmNumber)
+        .maybeSingle();
+
+      if (sudahIsi) {
+        alert("Anda sudah mengisi kuesioner");
+        return;
+      }
+
+      // SIMPAN LOCAL STORAGE
+      localStorage.setItem("mahasiswa_id", mahasiswa.id);
+      localStorage.setItem("nama", mahasiswa.nama);
+      localStorage.setItem("npm", mahasiswa.npm);
+
+      router.push("/kuesioner");
     } else {
-      localStorage.setItem("admin_username", data.username);
-      router.push("/admin");
+      // 🔒 ADMIN
+      const { data, error } = await supabase
+        .from("admin")
+        .select("*")
+        .eq("username", username)
+        .eq("password", password)
+        .single();
+
+      if (error || !data) {
+        alert("Username / Password salah");
+      } else {
+        localStorage.setItem("admin_username", data.username);
+        router.push("/admin");
+      }
     }
-  }
-};
+  };
 
   return (
     <div className="max-w-md mx-auto p-6">
@@ -89,31 +107,30 @@ const handleLogin = async () => {
         Selamat Datang
       </h2>
 
-{/* TOGGLE */}
-<div className="flex w-full mb-6 bg-gray-200 rounded-lg p-1">
+      {/* TOGGLE */}
+      <div className="flex w-full mb-6 bg-gray-200 rounded-lg p-1">
+        <button
+          onClick={() => setMode("mahasiswa")}
+          className={`flex-1 text-center py-2 rounded-lg ${
+            mode === "mahasiswa"
+              ? "bg-blue-600 text-white"
+              : "text-gray-600"
+          }`}
+        >
+          Mahasiswa
+        </button>
 
-  <button
-    onClick={() => setMode("mahasiswa")}
-    className={`flex-1 text-center py-2 rounded-lg ${
-      mode === "mahasiswa"
-        ? "bg-blue-600 text-white"
-        : "text-gray-600"
-    }`}
-  >
-    Mahasiswa
-  </button>
-
-  <button
-    onClick={() => setMode("admin")}
-    className={`flex-1 text-center py-2 rounded-lg ${
-      mode === "admin"
-        ? "bg-blue-600 text-white"
-        : "text-gray-600"
-    }`}
-  >
-    Admin
-  </button>
-</div>
+        <button
+          onClick={() => setMode("admin")}
+          className={`flex-1 text-center py-2 rounded-lg ${
+            mode === "admin"
+              ? "bg-blue-600 text-white"
+              : "text-gray-600"
+          }`}
+        >
+          Admin
+        </button>
+      </div>
 
       {/* FORM */}
       {mode === "mahasiswa" ? (
@@ -126,11 +143,31 @@ const handleLogin = async () => {
           />
 
           <input
+            type="text"
+            inputMode="numeric"
             placeholder="NPM"
             value={npm}
-            onChange={(e) => setNpm(e.target.value)}
-            className="w-full border p-3 mb-4 rounded-lg"
+            onChange={(e) => {
+              const value = e.target.value;
+
+              // HANYA ANGKA
+              if (/^\d*$/.test(value)) {
+                setNpm(value);
+                setNpmError("");
+              } else {
+                setNpmError("NPM hanya boleh berisi angka");
+              }
+            }}
+            className={`w-full border p-3 rounded-lg mb-4 ${
+              npmError ? "border-red-500" : ""
+            }`}
           />
+
+          {npmError && (
+            <p className="text-red-500 text-sm -mt-2 mb-3">
+              {npmError}
+            </p>
+          )}
         </div>
       ) : (
         <div>
@@ -142,9 +179,8 @@ const handleLogin = async () => {
           />
 
           {/* PASSWORD */}
-          <div className="mb-2">
+          <div className="mb-4">
             <div className="flex items-center border rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
-
               <input
                 type={showPassword ? "text" : "password"}
                 placeholder="Password"
@@ -158,8 +194,12 @@ const handleLogin = async () => {
                 onClick={() => setShowPassword(!showPassword)}
                 className="text-gray-400 hover:text-blue-500"
               >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-            </button>
+                {showPassword ? (
+                  <EyeOff size={20} />
+                ) : (
+                  <Eye size={20} />
+                )}
+              </button>
             </div>
           </div>
         </div>
@@ -173,7 +213,7 @@ const handleLogin = async () => {
         Login
       </button>
 
-      {/* LUPA PASSWORD - PINDAH KE BAWAH */}
+      {/* LUPA PASSWORD */}
       {mode === "admin" && (
         <div className="mt-3 text-center">
           <button
