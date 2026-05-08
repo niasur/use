@@ -175,31 +175,28 @@ export default function LoginForm() {
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
-            className="w-full border p-3 mb-3 rounded-lg"
+            className="w-full border p-3 pl-[26px] mb-3 rounded-lg"
           />
 
           {/* PASSWORD */}
-          <div className="mb-4">
-            <div className="flex items-center border rounded-xl px-4 py-3 focus-within:ring-2 focus-within:ring-blue-500">
-              <input
-                type={showPassword ? "text" : "password"}
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="flex-1 outline-none"
-              />
+<div className="mb-3">
+  <div className="flex items-center border rounded-lg p-3 focus-within:ring-2 focus-within:ring-blue-500">
 
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-400 hover:text-blue-500"
-              >
-                {showPassword ? (
-                  <EyeOff size={20} />
-                ) : (
-                  <Eye size={20} />
-                )}
-              </button>
+    <input
+      type={showPassword ? "text" : "password"}
+      placeholder="Password"
+      value={password}
+      onChange={(e) => setPassword(e.target.value)}
+      className="flex-1 outline-none"
+    />
+
+    <button
+      type="button"
+      onClick={() => setShowPassword(!showPassword)}
+      className="text-gray-400 hover:text-blue-500"
+    >
+      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+    </button>
             </div>
           </div>
         </div>

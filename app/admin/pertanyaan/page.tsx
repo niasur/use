@@ -72,6 +72,10 @@ const fetchData = async () => {
   setData(finalData);
 };
 
+useEffect(() => {
+  fetchData();
+}, []);
+
   // ================= TAMBAH =================
   const tambah = async () => {
     if (!isi.trim()) return alert("Isi dulu!");
