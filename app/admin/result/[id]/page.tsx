@@ -109,43 +109,50 @@ export default function ResultDetailPage() {
         </p>
       </div>
 
-      {/* LOOP PER KATEGORI */}
-      {Object.keys(groupedQuestions).map((kategori) => (
-        <div key={kategori} className="mb-6">
+{/* LOOP PER KATEGORI */}
+{[
+  "Usefulness",
+  "Ease of Use",
+  "Ease of Learning",
+  "Satisfaction",
+]
+  .filter((kategori) => groupedQuestions[kategori])
+  .map((kategori) => (
+    <div key={kategori} className="mb-6">
 
-          <h2 className="font-semibold text-blue-600 mb-3">
-            {kategori}
-          </h2>
+      <h2 className="font-semibold text-blue-600 mb-3">
+        {kategori}
+      </h2>
 
-          {groupedQuestions[kategori].map((q: any, i: number) => (
-            <div
-              key={q.id}
-              className="mb-4 border p-3 rounded-xl"
-            >
-              <p className="mb-2">
-                {i + 1}. {q.isi_pertanyaan}
-              </p>
+      {groupedQuestions[kategori].map((q: any, i: number) => (
+        <div
+          key={q.id}
+          className="mb-4 border p-3 rounded-xl"
+        >
+          <p className="mb-2">
+            {i + 1}. {q.isi_pertanyaan}
+          </p>
 
-              {/* LIKERT */}
-              <div className="flex gap-4">
-                {[1, 2, 3, 4, 5].map((n) => (
-                  <label
-                    key={n}
-                    className="flex items-center gap-1"
-                  >
-                    <input
-                      type="radio"
-                      checked={answers[q.id] === n}
-                      readOnly
-                    />
-                    {n}
-                  </label>
-                ))}
-              </div>
-            </div>
-          ))}
+          {/* LIKERT */}
+          <div className="flex gap-4">
+            {[1, 2, 3, 4, 5].map((n) => (
+              <label
+                key={n}
+                className="flex items-center gap-1"
+              >
+                <input
+                  type="radio"
+                  checked={answers[q.id] === n}
+                  readOnly
+                />
+                {n}
+              </label>
+            ))}
+          </div>
         </div>
       ))}
+    </div>
+))}
 
       {/* SARAN */}
       <div className="mt-8 border rounded-xl p-4 bg-gray-50">
