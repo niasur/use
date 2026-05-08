@@ -239,16 +239,23 @@ const handleSubmit = async () => {
         })}
 
       {/* SARAN */}
-      <textarea
-        placeholder="Saran / masukan (opsional)"
-        className="w-full border p-3 rounded-xl mb-6"
-        onChange={(e) =>
-          setAnswers({
-            ...answers,
-            saran: e.target.value
-          })
-        }
-      />
+<div className="mb-6">
+  <label className="block mb-2 font-medium text-sm text-green-600">
+    Apa saran / masukan Anda untuk pengembangan
+    fitur KRS SIAKAD UNIPEM ke depannya?
+  </label>
+
+  <textarea
+    placeholder="saran / masukan (opsional)"
+    className="w-full border p-3 rounded-xl"
+    onChange={(e) =>
+      setAnswers({
+        ...answers,
+        saran: e.target.value
+      })
+    }
+  />
+</div>
 
       {/* BUTTON */}
       <button
