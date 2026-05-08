@@ -17,7 +17,9 @@ export default function ResultDetailPage() {
   }, [id]);
 
   const fetchDetail = async () => {
-    // Ambil evaluation
+    // ======================
+    // AMBIL EVALUATION
+    // ======================
     const { data: evalData } = await supabase
       .from("evaluations")
       .select("*")
@@ -25,32 +27,22 @@ export default function ResultDetailPage() {
       .single();
 
     if (!evalData) return;
+
     setEvaluation(evalData);
 
-let saranText = "";
-
-try {
-  const parsed =
-    typeof evalData.answers === "string"
-      ? JSON.parse(evalData.answers)
-      : evalData.answers;
-
-  saranText = parsed?.saran || "";
-} catch (err) {
-  console.error(err);
-}
-
-setSaran(saranText);
-
-    // Ambil pertanyaan (SUDAH ADA TIPE)
+    // ======================
+    // AMBIL PERTANYAAN
+    // ======================
     const { data: qData } = await supabase
       .from("pertanyaan")
       .select("*")
-      .order("urutan", { ascending: true })
+      .order("urutan", { ascending: true });
 
     setQuestions(qData || []);
 
-    // Ambil mahasiswa
+    // ======================
+    // AMBIL MAHASISWA
+    // ======================
     const { data: mahasiswa } = await supabase
       .from("mahasiswa")
       .select("id")
@@ -59,7 +51,20 @@ setSaran(saranText);
 
     if (!mahasiswa) return;
 
-    // Ambil semua jawaban (LIKERT + TEXT)
+    // ======================
+    // AMBIL SARAN
+    // ======================
+    const { data: saranData } = await supabase
+      .from("saran")
+      .select("isi_saran")
+      .eq("mahasiswa_id", mahasiswa.id)
+      .single();
+
+    setSaran(saranData?.isi_saran || "");
+
+    // ======================
+    // AMBIL JAWABAN
+    // ======================
     const { data: jawabanData } = await supabase
       .from("jawaban")
       .select("*")
@@ -68,14 +73,15 @@ setSaran(saranText);
     const map: Record<string, any> = {};
 
     jawabanData?.forEach((j: any) => {
-      map[j.pertanyaan_id] =
-        j.jawaban_text ?? j.nilai ?? null;
+      map[j.pertanyaan_id] = j.nilai ?? null;
     });
 
     setAnswers(map);
   };
 
-  if (!evaluation) return <p className="p-6">Loading...</p>;
+  if (!evaluation) {
+    return <p className="p-6">Loading...</p>;
+  }
 
   // ======================
   // GROUP BY KATEGORI
@@ -94,52 +100,69 @@ setSaran(saranText);
 
       {/* INFO */}
       <div className="mb-6 border p-4 rounded-xl bg-gray-50">
-        <p><b>Nama:</b> {evaluation.student_name}</p>
-        <p><b>NPM:</b> {evaluation.student_id}</p>
-      </div>
-
-      {/* ======================
-          LOOP PER KATEGORI
-      ====================== */}
-{Object.keys(groupedQuestions).map((kategori) => (
-  <div key={kategori} className="mb-6">
-
-    <h2 className="font-semibold text-blue-600 mb-3">
-      {kategori}
-    </h2>
-
-    {groupedQuestions[kategori].map((q: any, i: number) => (
-      <div
-        key={q.id}
-        className="mb-4 border p-3 rounded-xl"
-      >
-        <p className="mb-2">
-          {i + 1}. {q.isi_pertanyaan}
+        <p>
+          <b>Nama:</b> {evaluation.student_name}
         </p>
 
-        {/* RENDER SESUAI TIPE */}
-{q.tipe === "likert" ? (
-  <div className="flex gap-4">
-    {[1, 2, 3, 4, 5].map((n) => (
-      <label key={n} className="flex items-center gap-1">
-        <input
-          type="radio"
-          checked={answers[q.id] === n}
-          readOnly
-        />
-        {n}
-      </label>
-    ))}
-  </div>
-) : (
-  <div className="border-l-4 border-green-500 p-3 rounded bg-green-50 whitespace-pre-line">
-    {answers[q.id] || (q.tipe === "text" ? saran : "Tidak ada jawaban")}
-  </div>
-)}
+        <p>
+          <b>NPM:</b> {evaluation.student_id}
+        </p>
       </div>
-    ))}
 
-  </div>
-))}
-</div>
-  )}
+      {/* LOOP PER KATEGORI */}
+      {Object.keys(groupedQuestions).map((kategori) => (
+        <div key={kategori} className="mb-6">
+
+          <h2 className="font-semibold text-blue-600 mb-3">
+            {kategori}
+          </h2>
+
+          {groupedQuestions[kategori].map((q: any, i: number) => (
+            <div
+              key={q.id}
+              className="mb-4 border p-3 rounded-xl"
+            >
+              <p className="mb-2">
+                {i + 1}. {q.isi_pertanyaan}
+              </p>
+
+              {/* LIKERT */}
+              <div className="flex gap-4">
+                {[1, 2, 3, 4, 5].map((n) => (
+                  <label
+                    key={n}
+                    className="flex items-center gap-1"
+                  >
+                    <input
+                      type="radio"
+                      checked={answers[q.id] === n}
+                      readOnly
+                    />
+                    {n}
+                  </label>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      ))}
+
+      {/* SARAN */}
+      <div className="mt-8 border rounded-xl p-4 bg-gray-50">
+        <h2 className="font-semibold text-green-600 mb-2">
+          Saran
+        </h2>
+
+        {saran ? (
+          <p className="whitespace-pre-line text-gray-700">
+            {saran}
+          </p>
+        ) : (
+          <p className="text-gray-400">
+            Tidak ada saran
+          </p>
+        )}
+      </div>
+    </div>
+  );
+}
