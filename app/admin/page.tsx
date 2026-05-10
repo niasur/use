@@ -69,7 +69,7 @@ export default function AdminPage() {
       const k = j.pertanyaan.kategori;
 
       if (!map[k]) map[k] = [];
-      map[k].push(Number(j.nilai)); // 🔥 FIX
+      map[k].push(Number(j.nilai)); 
     });
 
     const result = Object.keys(map).map((k) => {
